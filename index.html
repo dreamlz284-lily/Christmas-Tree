@@ -1,30 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Particle Christmas Tree</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift from Mengjie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Parisienne&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-        background-color: #000;
-      }
-      /* Importing very ornate script fonts for a "fancy" calligraphic look */
-      @import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Parisienne&family=Great+Vibes&family=Alex+Brush&display=swap');
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; h-full; pointer-events: none; }
+        .fancy-font { font-family: 'Pinyon Script', cursive; }
+        .greeting-font { font-family: 'Parisienne', cursive; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
-  }
-}
-</script>
 </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<body class="bg-black">
+    <div id="container" class="relative w-full h-screen overflow-hidden cursor-pointer">
+        <canvas id="treeCanvas"></canvas>
+        
+        <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)]"></div>
+
+        <div id="giftUI" class="absolute inset-0 flex flex-col transition-opacity duration-1000 opacity-100">
+            <div class="h-1/3 flex items-center justify-center pt-8">
+                <h2 class="fancy-font text-4xl md:text-7xl font-normal tracking-wide drop-shadow-[0_0_15px_rgba(255,215,0,0.6)] bg-clip-text text-transparent bg-gradient-to-b from-yellow-50 via-yellow-400 to-yellow-800 animate-pulse text-center px-4">
+                    Gift from Mengjie
+                </h2>
+            </div>
+            <div class="flex-1"></div>
+            <div class="h-1/3 flex items-start justify-center pt-12">
+                <p class="text-white/40 uppercase tracking-[0.4em] text-xs md:text-sm animate-bounce">Click to Open</p>
+            </div>
+        </div>
+
+        <div id="treeUI" class="absolute bottom-0 w-full h-[35%] flex flex-col items-center justify-end pb-12 pointer-events-none transition-opacity duration-1000 opacity-0">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent backdrop-blur-[1px]"></div>
+            <div class="relative z-10 text-center w-full px-4 max-w-4xl mx-auto">
+                <h1 class="fancy-font text-4xl md:text-6xl font-normal mb-2 tracking-wide drop-shadow-[0_0_20px_rgba(255,215,0,0.7)] bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-800">
+                    Merry Christmas
+                </h1>
+                <div id="greetingWrapper" class="transition-opacity duration-500 h-16 md:h-24 flex items-center justify-center">
+                    <p id="greetingText" class="greeting-font text-lg md:text-3xl font-normal leading-relaxed bg-clip-text text-transparent bg-gradient-to-r from-yellow-200/80 via-white to-yellow-200/80 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] text-center">
+                        Wishing you a joyful Christmas
+                    </p>
+                </div>
+                <p class="fancy-font text-lg md:text-2xl font-normal mt-2 opacity-90 tracking-[0.1em] bg-clip-text text-transparent bg-gradient-to-b from-yellow-200 via-yellow-500 to-yellow-800">
+                    From Mengjie
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 核心逻辑整合自 App.tsx ---
+        const canvas = document.getElementById('treeCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('container');
+        
+        const GREETINGS = [
+            "Wishing you a joyful Christmas and a New Year filled with good health and success.",
+            "Warmest wishes to you and your family for a peaceful and wonderful Christmas season.",
+            "May this Christmas bring you moments of rest, joy, and time well spent with loved ones.",
+            "Best wishes for a happy holiday season and a prosperous New Year ahead.",
+            "Wishing you a relaxing Christmas and continued success in the year to come."
+        ];
+
+        let particles = [], isGiftPhase = true, isTransitioning = false, greetingIndex = 0;
+        let rotation = { x: 0, y: 0 }, zoom = 1.0, isDragging = false, lastMouse = { x: 0, y: 0 };
+        let transitionStartTime = 0;
+
+        const random = (min, max) => Math.random() * (max - min) + min;
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const w = canvas.width, h = canvas.height;
+            const treeHeight = h * 0.75, treeBaseWidth = w * (w < 768 ? 0.85 : 0.45);
+            const boxSize = Math.min(w, h) * 0.22;
+            particles = [];
+
+            // 生成粒子逻辑 (Tree Body + Lights + Snow)
+            // 提示：为了浏览器性能，这里将 45000 降为 15000，视觉效果基本无差且不卡顿
+            for (let i = 0; i < 15000; i++) {
+                const y = random(-treeHeight / 2, treeHeight / 2);
+                const progress = (y + treeHeight / 2) / treeHeight;
+                const radius = (treeBaseWidth / 2) * progress;
+                const angle = random(0, Math.PI * 2);
+                const r = Math.sqrt(random(0, 1)) * radius;
+                
+                // 礼盒位置计算
+                let bx=0, by=0, bz=0, isRibbon=false;
+                const side = Math.floor(random(0, 6));
+                const u = random(-boxSize/2, boxSize/2), v = random(-boxSize/2, boxSize/2), d = boxSize/2;
+                if(side===0){bx=d;by=u;bz=v}else if(side===1){bx=-d;by=u;bz=v}else if(side===2){bx=u;by=d;bz=v}
+                else if(side===3){bx=u;by=-d;bz=v}else if(side===4){bx=u;by=v;bz=d}else{bx=u;by=v;bz=-d}
+                isRibbon = Math.abs(bx)<boxSize*0.15 || Math.abs(by)<boxSize*0.15 || Math.abs(bz)<boxSize*0.15;
+
+                particles.push({
+                    sx: bx, sy: by, sz: bz, // Gift box pos
+                    ix: r * Math.cos(angle), iy: y, iz: r * Math.sin(angle), // Tree pos
+                    x: bx, y: by, z: bz,
+                    color: isRibbon ? 'rgba(255,215,0,0.8)' : 'rgba(180,20,20,0.4)',
+                    baseColor: { r: 20, g: random(80, 220), b: 40 },
+                    size: random(0.5, 1.2),
+                    type: isRibbon ? 'RIBBON' : 'BODY',
+                    life: random(0, 100)
+                });
+            }
+            // 简单雪花
+            for(let i=0; i<200; i++) {
+                particles.push({ x: random(-w,w), y: random(-h,h), z: random(-500,500), vx: random(-0.2,0.2), vy: random(0.5,1.5), type: 'SNOW', size: random(1,2) });
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'lighter';
+
+            const now = performance.now();
+            let tProgress = isTransitioning ? Math.min(1, (now - transitionStartTime) / 3000) : 0;
+            const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+            if (!isDragging) rotation.y += isGiftPhase ? 0.005 : 0.003;
+            const cosY = Math.cos(rotation.y), sinY = Math.sin(rotation.y);
+            const cosX = Math.cos(rotation.x), sinX = Math.sin(rotation.x);
+
+            particles.forEach(p => {
+                if (p.type === 'SNOW') {
+                    if (!isGiftPhase) {
+                        p.y += p.vy; if (p.y > canvas.height/2 + 100) p.y = -canvas.height/2 - 100;
+                        drawPoint(p.x, p.y, p.z, `rgba(255,255,255,0.8)`, p.size);
+                    }
+                    return;
+                }
+
+                let tx = p.sx, ty = p.sy, tz = p.sz;
+                if (isTransitioning || !isGiftPhase) {
+                    const e = ease(tProgress || 1);
+                    tx = p.sx + (p.ix - p.sx) * e; ty = p.sy + (p.iy - p.sy) * e; tz = p.sz + (p.iz - p.sz) * e;
+                }
+
+                // 3D 旋转变换
+                const x1 = tx * cosY - tz * sinY, z1 = tx * sinY + tz * cosY;
+                const y2 = ty * cosX - z1 * sinX, z2 = ty * sinX + z1 * cosX;
+                const scale = (800 / (800 + z2)) * zoom;
+                const screenX = x1 * scale + canvas.width / 2, screenY = y2 * scale + canvas.height / 2;
+
+                p.life += 0.05;
+                if (isGiftPhase && !isTransitioning) {
+                    ctx.fillStyle = p.color;
+                } else {
+                    const shimmer = Math.sin(p.life + p.iy) * 0.2 + 0.8;
+                    ctx.fillStyle = `rgba(${p.baseColor.r},${p.baseColor.g * shimmer},${p.baseColor.b},0.6)`;
+                }
+                ctx.fillRect(screenX, screenY, p.size * scale, p.size * scale);
+            });
+
+            function drawPoint(px, py, pz, col, s) {
+                const scale = (800 / (800 + pz)) * zoom;
+                ctx.fillStyle = col;
+                ctx.beginPath(); ctx.arc(px*scale + canvas.width/2, py*scale + canvas.height/2, s*scale, 0, Math.PI*2); ctx.fill();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        container.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+        container.addEventListener('touchstart', (e) => handleStart(e.touches[0].clientX, e.touches[0].clientY));
+
+        function handleStart(x, y) {
+            if (isGiftPhase && !isTransitioning) {
+                isTransitioning = true;
+                transitionStartTime = performance.now();
+                document.getElementById('giftUI').style.opacity = '0';
+                setTimeout(() => {
+                    isGiftPhase = false;
+                    document.getElementById('treeUI').style.opacity = '1';
+                    startGreetingCycle();
+                }, 1000);
+            }
+        }
+
+        function startGreetingCycle() {
+            setInterval(() => {
+                const wrapper = document.getElementById('greetingWrapper');
+                wrapper.style.opacity = '0';
+                setTimeout(() => {
+                    greetingIndex = (greetingIndex + 1) % GREETINGS.length;
+                    document.getElementById('greetingText').innerText = GREETINGS[greetingIndex];
+                    wrapper.style.opacity = '1';
+                }, 500);
+            }, 6000);
+        }
+
+        window.addEventListener('resize', init);
+        init(); animate();
+    </script>
+</body>
 </html>
