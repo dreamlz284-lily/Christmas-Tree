@@ -9,7 +9,7 @@ export interface Particle {
   iy: number;
   iz: number;
 
-  // Start Position (for Intro Animation)
+  // Start Position (for Intro Animation / Gift Box)
   sx: number;
   sy: number;
   sz: number;
@@ -32,7 +32,9 @@ export interface Particle {
 export enum ParticleType {
   TREE_BODY = 'TREE_BODY',
   TREE_LIGHT = 'TREE_LIGHT',
-  SNOW = 'SNOW'
+  SNOW = 'SNOW',
+  GIFT_BOX = 'GIFT_BOX',
+  GIFT_RIBBON = 'GIFT_RIBBON'
 }
 
 export interface CanvasSize {

@@ -37,10 +37,13 @@ const App: React.FC = () => {
   
   const [greetingIndex, setGreetingIndex] = useState(0);
   const [fade, setFade] = useState(true);
+  const [isGiftPhase, setIsGiftPhase] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const particles = useRef<Particle[]>([]);
   const frameId = useRef<number>(0);
   const startTime = useRef<number | null>(null);
+  const transitionStartTime = useRef<number | null>(null);
   
   const rotation = useRef({ x: 0, y: 0 }); 
   const zoom = useRef(1.0);
@@ -55,34 +58,54 @@ const App: React.FC = () => {
     const currentBaseWidthRatio = isMobile ? TREE_BASE_WIDTH_RATIO_MOBILE : TREE_BASE_WIDTH_RATIO;
     const treeBaseWidth = width * currentBaseWidthRatio;
 
+    // Helper for gift box mapping
+    const boxSize = Math.min(width, height) * 0.22;
+    const getBoxPos = () => {
+        const side = Math.floor(random(0, 6));
+        let x = 0, y = 0, z = 0;
+        const u = random(-boxSize / 2, boxSize / 2);
+        const v = random(-boxSize / 2, boxSize / 2);
+        const d = boxSize / 2;
+        if (side === 0) { x = d; y = u; z = v; }
+        else if (side === 1) { x = -d; y = u; z = v; }
+        else if (side === 2) { x = u; y = d; z = v; }
+        else if (side === 3) { x = u; y = -d; z = v; }
+        else if (side === 4) { x = u; y = v; z = d; }
+        else { x = u; y = v; z = -d; }
+        
+        // Ribbon check
+        const isRibbon = Math.abs(x) < boxSize * 0.15 || Math.abs(y) < boxSize * 0.15 || Math.abs(z) < boxSize * 0.15;
+        return { x, y, z, isRibbon };
+    };
+
+    // 1. Tree Body
     for (let i = 0; i < TREE_PARTICLE_COUNT; i++) {
       const y = random(-treeHeight / 2, treeHeight / 2);
       const progress = (y + treeHeight / 2) / treeHeight; 
       const radiusAtHeight = (treeBaseWidth / 2) * progress;
       const angle = random(0, Math.PI * 2);
       const r = Math.sqrt(random(0, 1)) * radiusAtHeight;
-      const x = r * Math.cos(angle);
-      const z = r * Math.sin(angle);
+      const tx = r * Math.cos(angle);
+      const tz = r * Math.sin(angle);
       const g = Math.floor(random(80, 220)); 
       const baseColor = { r: 20, g: g, b: 40 };
-      const size = random(0.2, 1.1); 
-
+      
+      const bPos = getBoxPos();
       newParticles.push({
-        x, y, z,
-        ix: x, iy: y, iz: z,
-        sx: random(-width * 1.5, width * 1.5),
-        sy: random(-height * 1.5, height * 1.5),
-        sz: random(-1000, 1000),
+        x: bPos.x, y: bPos.y, z: bPos.z,
+        ix: tx, iy: y, iz: tz,
+        sx: bPos.x, sy: bPos.y, sz: bPos.z,
         vx: 0, vy: 0,
         color: `rgb(${baseColor.r},${baseColor.g},${baseColor.b})`,
         baseColor,
         life: random(0, 100),
         maxLife: 100,
-        size: size,
-        type: ParticleType.TREE_BODY
+        size: random(0.2, 1.1),
+        type: bPos.isRibbon ? ParticleType.GIFT_RIBBON : ParticleType.TREE_BODY
       });
     }
 
+    // 2. Double Spiral
     const spiralLoops = 6;
     for (let i = 0; i < SPIRAL_PARTICLE_COUNT; i++) {
       const isSecondSpiral = i % 2 === 0;
@@ -95,37 +118,34 @@ const App: React.FC = () => {
       if (isSecondSpiral) angle += Math.PI; 
       const r = radiusAtHeight * random(0.95, 1.05); 
       angle += random(-0.15, 0.15);
-      const x = r * Math.cos(angle);
-      const z = r * Math.sin(angle);
-      const rand = Math.random();
-      let baseColor = { r: 255, g: 215, b: 0 }; 
-      if (rand < 0.5) baseColor = { r: 255, g: 250, b: 180 }; 
-      const size = random(0.4, 0.9); 
-
+      const tx = r * Math.cos(angle);
+      const tz = r * Math.sin(angle);
+      let baseColor = Math.random() < 0.5 ? { r: 255, g: 215, b: 0 } : { r: 255, g: 250, b: 180 };
+      
+      const bPos = getBoxPos();
       newParticles.push({
-        x, y, z,
-        ix: x, iy: y, iz: z,
-        sx: random(-width * 1.5, width * 1.5),
-        sy: random(-height * 1.5, height * 1.5),
-        sz: random(-1000, 1000),
+        x: bPos.x, y: bPos.y, z: bPos.z,
+        ix: tx, iy: y, iz: tz,
+        sx: bPos.x, sy: bPos.y, sz: bPos.z,
         vx: 0, vy: 0,
         color: `rgb(${baseColor.r},${baseColor.g},${baseColor.b})`,
         baseColor,
         life: random(0, 100),
         maxLife: 100,
-        size: size,
+        size: random(0.4, 0.9),
         type: ParticleType.TREE_LIGHT
       });
     }
 
+    // 3. Ornaments
     for (let i = 0; i < ORNAMENT_COUNT; i++) {
       const y = random(-treeHeight / 2, treeHeight / 2);
       const progress = (y + treeHeight / 2) / treeHeight;
       const radiusAtHeight = (treeBaseWidth / 2) * progress;
       const angle = random(0, Math.PI * 2);
       const r = radiusAtHeight * random(0.65, 1.0); 
-      const x = r * Math.cos(angle);
-      const z = r * Math.sin(angle);
+      const tx = r * Math.cos(angle);
+      const tz = r * Math.sin(angle);
       const colorType = Math.random();
       let baseColor;
       if (colorType < 0.2) baseColor = { r: 180, g: 40, b: 40 };      
@@ -133,24 +153,23 @@ const App: React.FC = () => {
       else if (colorType < 0.6) baseColor = { r: 180, g: 70, b: 180 };
       else if (colorType < 0.8) baseColor = { r: 180, g: 115, b: 0 };  
       else baseColor = { r: 150, g: 150, b: 150 };                     
-      const size = random(0.6, 1.0); 
-
+      
+      const bPos = getBoxPos();
       newParticles.push({
-        x, y, z,
-        ix: x, iy: y, iz: z,
-        sx: random(-width * 1.5, width * 1.5),
-        sy: random(-height * 1.5, height * 1.5),
-        sz: random(-1000, 1000),
+        x: bPos.x, y: bPos.y, z: bPos.z,
+        ix: tx, iy: y, iz: tz,
+        sx: bPos.x, sy: bPos.y, sz: bPos.z,
         vx: 0, vy: 0,
         color: `rgb(${baseColor.r},${baseColor.g},${baseColor.b})`,
         baseColor,
         life: random(0, 100),
         maxLife: 100,
-        size: size,
+        size: random(0.6, 1.0),
         type: ParticleType.TREE_LIGHT
       });
     }
 
+    // 4. Snow
     for (let i = 0; i < SNOW_PARTICLE_COUNT; i++) {
       newParticles.push({
         x: random(-width, width), 
@@ -171,7 +190,17 @@ const App: React.FC = () => {
     particles.current = newParticles;
   }, []);
 
+  const openGift = () => {
+    if (!isGiftPhase || isTransitioning) return;
+    setIsTransitioning(true);
+    transitionStartTime.current = performance.now();
+    setTimeout(() => {
+        setIsGiftPhase(false);
+    }, 1000); 
+  };
+
   useEffect(() => {
+    if (isGiftPhase) return;
     const interval = setInterval(() => {
       setFade(false);
       setTimeout(() => {
@@ -180,7 +209,7 @@ const App: React.FC = () => {
       }, 500); 
     }, 6000); 
     return () => clearInterval(interval);
-  }, []);
+  }, [isGiftPhase]);
 
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
@@ -190,10 +219,11 @@ const App: React.FC = () => {
 
     const now = performance.now();
     if (startTime.current === null) startTime.current = now;
-    const elapsed = now - startTime.current;
-    const duration = 4000; 
-    const progress = Math.min(1, elapsed / duration);
-    const ease = 1 - Math.pow(1 - progress, 3);
+    
+    let tProgress = 0;
+    if (isTransitioning && transitionStartTime.current) {
+        tProgress = Math.min(1, (now - transitionStartTime.current) / 3000);
+    }
 
     const width = canvas.width;
     const height = canvas.height;
@@ -204,8 +234,7 @@ const App: React.FC = () => {
     ctx.globalCompositeOperation = 'lighter';
 
     if (!isDragging.current) {
-        const speedMultiplier = 1 + (1 - ease) * 5; 
-        rotation.current.y += ROTATION_SPEED * speedMultiplier;
+        rotation.current.y += isGiftPhase ? 0.005 : ROTATION_SPEED;
     }
     
     const cosY = Math.cos(rotation.current.y);
@@ -216,15 +245,22 @@ const App: React.FC = () => {
     const pList = particles.current;
     const len = pList.length;
 
+    const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
     for (let i = 0; i < len; i++) {
       const p = pList[i];
-      if (p.type === ParticleType.TREE_BODY || p.type === ParticleType.TREE_LIGHT) {
-        let tx = p.ix; let ty = p.iy; let tz = p.iz;
-        if (progress < 1) {
-          tx = p.sx + (p.ix - p.sx) * ease;
-          ty = p.sy + (p.iy - p.sy) * ease;
-          tz = p.sz + (p.iz - p.sz) * ease;
+      if (p.type !== ParticleType.SNOW) {
+        let tx = p.sx; let ty = p.sy; let tz = p.sz;
+        
+        if (isTransitioning) {
+            const e = ease(tProgress);
+            tx = p.sx + (p.ix - p.sx) * e;
+            ty = p.sy + (p.iy - p.sy) * e;
+            tz = p.sz + (p.iz - p.sz) * e;
+        } else if (!isGiftPhase) {
+            tx = p.ix; ty = p.iy; tz = p.iz;
         }
+
         const x1 = tx * cosY - tz * sinY;
         const z1 = tx * sinY + tz * cosY;
         const y1 = ty;
@@ -238,19 +274,25 @@ const App: React.FC = () => {
         p.life += BLINK_SPEED;
         const size = p.size * scale;
         
-        if (p.type === ParticleType.TREE_LIGHT) {
-          const blink = Math.sin(p.life * 2 + p.ix) * 0.5 + 0.5; 
-          let alpha = blink < 0.1 ? 0.1 : 0.6; 
-          ctx.fillStyle = `rgba(${p.baseColor.r}, ${p.baseColor.g}, ${p.baseColor.b}, ${alpha})`;
-          if (size < 1.2) ctx.fillRect(x, y, size, size);
-          else { ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill(); }
+        if (isGiftPhase && !isTransitioning) {
+            const isRibbon = p.type === ParticleType.GIFT_RIBBON;
+            ctx.fillStyle = isRibbon ? `rgba(255, 215, 0, 0.8)` : `rgba(180, 20, 20, 0.4)`;
+            ctx.fillRect(x, y, size, size);
         } else {
-          const shimmer = Math.sin(p.life + p.iy) * 0.2 + 0.8;
-          ctx.fillStyle = `rgba(${p.baseColor.r}, ${p.baseColor.g * shimmer}, ${p.baseColor.b}, 0.4)`;
-          if (size < 1.5) ctx.fillRect(x, y, size, size);
-          else { ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill(); }
+            if (p.type === ParticleType.TREE_LIGHT) {
+                const blink = Math.sin(p.life * 2 + p.ix) * 0.5 + 0.5; 
+                let alpha = blink < 0.1 ? 0.1 : 0.6; 
+                ctx.fillStyle = `rgba(${p.baseColor.r}, ${p.baseColor.g}, ${p.baseColor.b}, ${alpha})`;
+                if (size < 1.2) ctx.fillRect(x, y, size, size);
+                else { ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill(); }
+            } else {
+                const shimmer = Math.sin(p.life + p.iy) * 0.2 + 0.8;
+                ctx.fillStyle = `rgba(${p.baseColor.r}, ${p.baseColor.g * shimmer}, ${p.baseColor.b}, 0.4)`;
+                if (size < 1.5) ctx.fillRect(x, y, size, size);
+                else { ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill(); }
+            }
         }
-      } else if (p.type === ParticleType.SNOW) {
+      } else if (p.type === ParticleType.SNOW && !isGiftPhase) {
         p.x += p.vx; p.y += p.vy;
         if (p.y > height / 2 + 100) { p.y = -height / 2 - 100; p.x = random(-width / 1.5, width / 1.5); }
         const scale = (fov / (fov + p.z)) * currentZoom;
@@ -263,7 +305,7 @@ const App: React.FC = () => {
     }
     ctx.globalCompositeOperation = 'source-over';
     frameId.current = requestAnimationFrame(animate);
-  }, []);
+  }, [isGiftPhase, isTransitioning]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -280,7 +322,10 @@ const App: React.FC = () => {
     return () => { window.removeEventListener('resize', handleResize); cancelAnimationFrame(frameId.current); };
   }, [initParticles, animate]);
 
-  const handleStart = (clientX: number, clientY: number) => { isDragging.current = true; lastMouse.current = { x: clientX, y: clientY }; };
+  const handleStart = (clientX: number, clientY: number) => { 
+    if (isGiftPhase) { openGift(); return; }
+    isDragging.current = true; lastMouse.current = { x: clientX, y: clientY }; 
+  };
   const handleMove = (clientX: number, clientY: number) => {
     if (!isDragging.current) return;
     const dx = clientX - lastMouse.current.x;
@@ -296,7 +341,7 @@ const App: React.FC = () => {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-screen bg-black overflow-hidden font-sans cursor-grab active:cursor-grabbing"
+      className="relative w-full h-screen bg-black overflow-hidden font-sans cursor-pointer"
       onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
       onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
       onMouseUp={handleEnd}
@@ -308,35 +353,57 @@ const App: React.FC = () => {
     >
       <canvas ref={canvasRef} className="block absolute top-0 left-0 w-full h-full pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)]"></div>
-      <div className="absolute bottom-0 w-full h-[35%] flex flex-col items-center justify-end pb-12 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent backdrop-blur-[1px]"></div>
-        
-        <div className="relative z-10 text-center w-full px-4 max-w-4xl mx-auto">
-          {/* Main Title - Ornate Pinyon Script Font */}
-          <h1 
-            className="text-4xl md:text-6xl font-normal mb-2 tracking-wide drop-shadow-[0_0_20px_rgba(255,215,0,0.7)] bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-800" 
-            style={{ fontFamily: '"Pinyon Script", cursive' }}
-          >
-            Merry Christmas
-          </h1>
-          
-          <div className={`transition-opacity duration-1000 ease-in-out h-16 md:h-24 flex items-center justify-center ${fade ? 'opacity-100' : 'opacity-0'}`}>
-            <p 
-              className="text-lg md:text-3xl font-normal leading-relaxed bg-clip-text text-transparent bg-gradient-to-r from-yellow-200/80 via-white to-yellow-200/80 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" 
-              style={{ fontFamily: '"Parisienne", cursive' }}
-            >
-              {GREETINGS[greetingIndex]}
-            </p>
-          </div>
+      
+      {isGiftPhase ? (
+          <div className={`absolute inset-0 flex flex-col transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+              {/* Repositioned title at the top */}
+              <div className="h-1/3 flex items-center justify-center pt-8">
+                <h2 
+                  className="text-4xl md:text-7xl font-normal tracking-wide drop-shadow-[0_0_15px_rgba(255,215,0,0.6)] bg-clip-text text-transparent bg-gradient-to-b from-yellow-50 via-yellow-400 to-yellow-800 animate-pulse text-center px-4" 
+                  style={{ fontFamily: '"Pinyon Script", cursive' }}
+                >
+                  Gift from Mengjie
+                </h2>
+              </div>
+              
+              {/* Spacer for the gift box in the middle */}
+              <div className="flex-1"></div>
 
-          <p 
-            className="text-lg md:text-2xl font-normal mt-2 opacity-90 tracking-[0.1em] bg-clip-text text-transparent bg-gradient-to-b from-yellow-200 via-yellow-500 to-yellow-800 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]" 
-            style={{ fontFamily: '"Pinyon Script", cursive' }}
-          >
-            From Mengjie
-          </p>
-        </div>
-      </div>
+              {/* Repositioned prompt at the bottom */}
+              <div className="h-1/3 flex items-start justify-center pt-12">
+                <p className="text-white/40 uppercase tracking-[0.4em] text-xs md:text-sm animate-bounce">Click to Open</p>
+              </div>
+          </div>
+      ) : (
+          <div className="absolute bottom-0 w-full h-[35%] flex flex-col items-center justify-end pb-12 pointer-events-none transition-opacity duration-1000 opacity-100">
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent backdrop-blur-[1px]"></div>
+            
+            <div className="relative z-10 text-center w-full px-4 max-w-4xl mx-auto">
+              <h1 
+                className="text-4xl md:text-6xl font-normal mb-2 tracking-wide drop-shadow-[0_0_20px_rgba(255,215,0,0.7)] bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-800" 
+                style={{ fontFamily: '"Pinyon Script", cursive' }}
+              >
+                Merry Christmas
+              </h1>
+              
+              <div className={`transition-opacity duration-1000 ease-in-out h-16 md:h-24 flex items-center justify-center ${fade ? 'opacity-100' : 'opacity-0'}`}>
+                <p 
+                  className="text-lg md:text-3xl font-normal leading-relaxed bg-clip-text text-transparent bg-gradient-to-r from-yellow-200/80 via-white to-yellow-200/80 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" 
+                  style={{ fontFamily: '"Parisienne", cursive' }}
+                >
+                  {GREETINGS[greetingIndex]}
+                </p>
+              </div>
+
+              <p 
+                className="text-lg md:text-2xl font-normal mt-2 opacity-90 tracking-[0.1em] bg-clip-text text-transparent bg-gradient-to-b from-yellow-200 via-yellow-500 to-yellow-800 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]" 
+                style={{ fontFamily: '"Pinyon Script", cursive' }}
+              >
+                From Mengjie
+              </p>
+            </div>
+          </div>
+      )}
     </div>
   );
 };
