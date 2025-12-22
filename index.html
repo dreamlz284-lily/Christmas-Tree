@@ -6,13 +6,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Parisienne&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; }
-        canvas { display: block; position: absolute; }
+        body { margin: 0; background: #000; overflow: hidden; width: 100vw; height: 100vh; }
+        canvas { display: block; position: absolute; top: 0; left: 0; }
         .fancy-font { font-family: 'Pinyon Script', cursive; }
-        /* 纯净磨砂：只有模糊，完全无边框，无背景色 */
         .pure-blur {
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.01); /* 极微弱背景辅助模糊渲染 */
         }
     </style>
 </head>
@@ -22,7 +22,7 @@
         <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
             <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700 transition-opacity duration-1000">Gift from Mengjie</h1>
             
-            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center pure-blur px-16 py-10 rounded-full">
+            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center pure-blur px-12 md:px-20 py-10 rounded-full">
                 <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
                 <p id="msg" class="text-white/90 text-2xl md:text-3xl italic h-16 transition-opacity duration-1000 flex items-center justify-center"></p>
                 <p class="fancy-font text-3xl text-yellow-600 mt-4">From Mengjie</p>
@@ -42,15 +42,17 @@
         function init() {
             w = canvas.width = window.innerWidth;
             h = canvas.height = window.innerHeight;
+            if (w === 0 || h === 0) return; // 防止尺寸为0导致计算错误
+            
             pts = [];
             const size = Math.min(w, h);
             const bS = size * 0.28, tH = h * 0.7, tB = size * 0.45;
 
-            // 初始化20,000个树粒子
             for(let i=0; i<20000; i++) {
                 let bx, by, bz, s = Math.floor(Math.random()*6), u = Math.random()-0.5, v = Math.random()-0.5;
                 if(s==0){bx=0.5;by=u;bz=v} else if(s==1){bx=-0.5;by=u;bz=v} else if(s==2){bx=u;by=0.5;bz=v}
                 else if(s==3){bx=u;by=-0.5;bz=v} else if(s==4){bx=u;by=v;bz=0.5} else {bx=u;by=v;bz=-0.5}
+                
                 const isRibbon = Math.abs(u) < 0.12 || Math.abs(v) < 0.12;
                 const ty = Math.random() - 0.5;
                 const rBase = 0.5 * (ty + 0.5);
@@ -67,7 +69,7 @@
                     targetY = -tH/2 - 30; 
                     targetZ = Math.sin(starAngle) * starDist;
                     targetColor = [255, 255, 200]; 
-                    pSize = Math.random() * 3.5 + 1.5; 
+                    pSize = Math.random() * 3 + 1.5; 
                 } else if (i < 5000) { 
                     const spiralAngle = (ty + 0.5) * Math.PI * 10; 
                     const drift = (Math.random() - 0.5) * 0.2; 
@@ -75,19 +77,19 @@
                     targetY = ty * tH;
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
                     targetColor = [255, 215, 30]; 
-                    pSize = Math.random() * 2.8 + 1.2; 
+                    pSize = Math.random() * 2.5 + 1.0; 
                 } else if (roll < 0.2) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                    pSize = Math.random() * 2.5 + 1.5;
+                    pSize = Math.random() * 2.2 + 1.2;
                 } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = [60, 180 + Math.random()*75, 50]; 
-                    pSize = Math.random() * 1.8 + 0.8;
+                    pSize = Math.random() * 1.5 + 0.5;
                 }
                 
                 pts.push({
@@ -101,19 +103,16 @@
                     speed: 0.002 + Math.random() * 0.004
                 });
             }
-            
-            // 初始化300颗雪花，带风偏向
             snow = Array.from({length: 300}, () => ({
-                x: Math.random() * w, 
-                y: Math.random() * h, 
-                v: Math.random() * 1.5 + 0.5, 
-                s: Math.random() * 2.5 + 0.5,
+                x: Math.random() * w, y: Math.random() * h, 
+                v: Math.random() * 1.5 + 0.5, s: Math.random() * 2.5 + 0.5,
                 wind: (Math.random() - 0.5) * 0.5
             }));
         }
 
         function draw() {
-            canvas.width = window.innerWidth; 
+            if (!w || !h) return;
+            ctx.clearRect(0, 0, w, h);
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, w, h);
             ctx.globalCompositeOperation = 'lighter';
@@ -122,33 +121,37 @@
             if (active && t < 1) t += 0.012;
             const ease = t*t*(3-2*t), cos = Math.cos(rot), sin = Math.sin(rot);
 
-            pts.forEach(p => {
+            for (let i = 0; i < pts.length; i++) {
+                const p = pts[i];
                 const px = p.bx + (p.tx - p.bx) * ease;
                 const py = p.by + (p.ty - p.by) * ease;
                 const pz = p.bz + (p.tz - p.bz) * ease;
                 const rx = px * cos - pz * sin;
                 const rz = px * sin + pz * cos;
                 const s = 1000 / (1000 + rz);
+                
                 const r = Math.floor(p.cGift[0] + (p.cTree[0] - p.cGift[0]) * ease);
                 const g = Math.floor(p.cGift[1] + (p.cTree[1] - p.cGift[1]) * ease);
                 const b = Math.floor(p.cGift[2] + (p.cTree[2] - p.cGift[2]) * ease);
+
                 let shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.2 + 0.8);
                 if(p.isStar && active) shimmer += Math.random() * 0.4;
+
                 const depthFade = Math.max(0.15, s); 
-                ctx.fillStyle = `rgb(${r * shimmer * depthFade},${g * shimmer * depthFade},${b * shimmer * depthFade})`;
+                ctx.fillStyle = `rgb(${Math.floor(r * shimmer * depthFade)},${Math.floor(g * shimmer * depthFade)},${Math.floor(b * shimmer * depthFade)})`;
                 ctx.fillRect(rx*s + w/2, py*s + h/2, p.sz*s, p.sz*s);
-            });
+            }
 
             if (active) {
-                // 绘制大雪纷飞效果
                 ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-                snow.forEach(s => {
+                for (let i = 0; i < snow.length; i++) {
+                    const s = snow[i];
                     s.y = (s.y + s.v) % h;
                     s.x = (s.x + s.wind + w) % w;
                     ctx.beginPath();
                     ctx.arc(s.x, s.y, s.s, 0, Math.PI * 2);
                     ctx.fill();
-                });
+                }
             }
             requestAnimationFrame(draw);
         }
@@ -178,8 +181,13 @@
             setTimeout(updateMsg, 5000);
         }
 
-        window.onresize = init;
-        init(); draw();
+        window.addEventListener('resize', () => {
+            init();
+        });
+
+        // 启动
+        init(); 
+        requestAnimationFrame(draw);
     </script>
 </body>
 </html>
