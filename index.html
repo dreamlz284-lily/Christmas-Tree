@@ -39,7 +39,7 @@
             const size = Math.min(w, h);
             const bS = size * 0.28, tH = h * 0.7, tB = size * 0.45;
 
-            for(let i=0; i<18000; i++) {
+            for(let i=0; i<15000; i++) {
                 let bx, by, bz, s = Math.floor(Math.random()*6), u = Math.random()-0.5, v = Math.random()-0.5;
                 if(s==0){bx=0.5;by=u;bz=v} else if(s==1){bx=-0.5;by=u;bz=v} else if(s==2){bx=u;by=0.5;bz=v}
                 else if(s==3){bx=u;by=-0.5;bz=v} else if(s==4){bx=u;by=v;bz=0.5} else {bx=u;by=v;bz=-0.5}
@@ -61,18 +61,18 @@
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
                     targetColor = [210, 165, 32]; // 柔和的金麒麟色，降低刺眼度
                     pSize = Math.random() * 3 + 3; // 加粗螺旋粒子
-                } else if (roll < 0.13) { 
+                } else if (roll < 0.15) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                    pSize = Math.random() * 2.5 + 1.2;
+                    pSize = Math.random() * 2.5 + 1.4;
                 } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = [20, 80 + Math.random()*60, 20];
-                    pSize = Math.random() * 1.8 + 0.8;
+                    pSize = Math.random() * 2 + 0.8;
                 }
                 
                 pts.push({
