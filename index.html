@@ -55,7 +55,7 @@
                 let targetX, targetY, targetZ, targetColor, pSize, isSpiral = false, isStar = false;
                 const roll = Math.random();
 
-                if (i < 400) { 
+                if (i < 300) { 
                     // --- 五角星形状算法 ---
                     isStar = true;
                     // 五角星的数学参数
@@ -80,10 +80,10 @@
                     
                     tx = Math.cos(angle - Math.PI/2) * dist; // 旋转 -90度让尖角朝上
                     typ = -tH/2 - 45 + (Math.sin(angle - Math.PI/2) * dist); 
-                    tz = (Math.random() - 0.5) * 6.5; // 让星星有一点点厚度
+                    tz = (Math.random() - 0.5) * 8; // 让星星有一点点厚度
                     
                     col = [255, 182, 50]; 
-                    sz = Math.random() * 1 + 1;
+                    sz = Math.random() * 1.5 + 0.3;
                 } else if (i < 5000) { // 金色螺旋：快速旋转
                     isSpiral = true;
                     const sAng = (ty + 0.5) * Math.PI * 10; 
