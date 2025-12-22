@@ -15,11 +15,11 @@
     <div id="container" class="relative w-full h-screen cursor-pointer">
         <canvas id="c"></canvas>
         <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
-            <h1 id="h1" class="fancy-font text-5xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700 animate-pulse">Gift from Mengjie</h1>
+            <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700 animate-pulse">Gift from Mengjie</h1>
             <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center">
-                <h2 class="fancy-font text-6xl md:text-8xl text-yellow-400 mb-2">Merry Christmas</h2>
-                <p id="msg" class="text-white/80 text-xl italic h-8 transition-opacity duration-500"></p>
-                <p class="fancy-font text-2xl text-yellow-600 mt-4">From Mengjie</p>
+                <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
+                <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-500"></p>
+                <p class="fancy-font text-3xl text-yellow-600 mt-4">From Mengjie</p>
             </div>
             <p id="hint" class="text-white/20 tracking-[0.5em] text-xs">CLICK TO UNWRAP</p>
         </div>
@@ -27,7 +27,7 @@
 
     <script>
         const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-        const msgs = ["Wishing you peace & joy", "Success in 2025", "Merry Christmas!", "Stay healthy and happy"];
+        const msgs = ["Best wishes for a happy holiday season", "Success in 2026", "May your Christmas be filled with warmth!", "Wishing you a joyful Christmas and a New Year filled with good health","Season’s greetings, and thank you for your support"];
         const DECO_COLORS = [[255, 50, 50], [50, 100, 255], [220, 220, 220], [180, 50, 255], [0, 128, 128], [255, 140, 0]];
 
         let w, h, pts = [], snow = [], active = false, t = 0, rot = 0, mIdx = 0;
@@ -155,7 +155,7 @@
                 el.style.opacity = 1;
                 mIdx = (mIdx + 1) % msgs.length;
             }, 500);
-            setTimeout(updateMsg, 4000);
+            setTimeout(updateMsg, 5000);
         }
 
         window.onresize = init;
