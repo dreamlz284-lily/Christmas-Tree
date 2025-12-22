@@ -52,7 +52,7 @@
                 let targetX, targetY, targetZ, targetColor, pSize;
                 const roll = Math.random();
 
-                if (i < 2500) { 
+                if (i < 2000) { 
                     // --- 螺旋优化：增加随机偏移（空间感）和粒子粗细 ---
                     const spiralAngle = (ty + 0.5) * Math.PI * 10; 
                     const drift = (Math.random() - 0.5) * 0.2; // 增加螺旋散布感
@@ -61,12 +61,12 @@
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
                     targetColor = [210, 165, 32]; // 柔和的金麒麟色，降低刺眼度
                     pSize = Math.random() * 3 + 3; // 加粗螺旋粒子
-                } else if (roll < 0.15) { 
+                } else if (roll < 0.10) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                    pSize = Math.random() * 2.5 + 1.4;
+                    pSize = Math.random() * 2.5 + 1.8;
                 } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
