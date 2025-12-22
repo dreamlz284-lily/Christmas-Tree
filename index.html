@@ -60,19 +60,19 @@
                     targetY = ty * tH;
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
                     targetColor = [210, 165, 32]; // 柔和的金麒麟色，降低刺眼度
-                    pSize = Math.random() * 3 + 1; // 加粗螺旋粒子
+                    pSize = Math.random() * 2.5 + 1; // 加粗螺旋粒子
                 } else if (roll < 0.10) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                    pSize = Math.random() * 2.5 + 1.0;
+                    pSize = Math.random() * 2 + 1.0;
                 } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = [30, 100 + Math.random()*70, 50];
-                    pSize = Math.random() * 2 + 0.8;
+                    pSize = Math.random() * 1.5 + 0.8;
                 }
                 
                 pts.push({
