@@ -52,15 +52,15 @@
                 let targetX, targetY, targetZ, targetColor, pSize;
                 const roll = Math.random();
 
-                if (i < 2000) { 
+                if (i < 2500) { 
                     // --- 螺旋优化：增加随机偏移（空间感）和粒子粗细 ---
                     const spiralAngle = (ty + 0.5) * Math.PI * 10; 
-                    const drift = (Math.random() - 0.5) * 0.08; // 增加螺旋散布感
+                    const drift = (Math.random() - 0.5) * 0.2; // 增加螺旋散布感
                     targetX = Math.cos(spiralAngle + drift) * (rBase + drift) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
-                    targetColor = [218, 165, 32]; // 柔和的金麒麟色，降低刺眼度
-                    pSize = Math.random() * 3 + 1.5; // 加粗螺旋粒子
+                    targetColor = [210, 165, 32]; // 柔和的金麒麟色，降低刺眼度
+                    pSize = Math.random() * 3 + 3; // 加粗螺旋粒子
                 } else if (roll < 0.15) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
@@ -71,7 +71,7 @@
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = [20, 80 + Math.random()*60, 30];
+                    targetColor = [20, 80 + Math.random()*60, 20];
                     pSize = Math.random() * 1.5 + 0.5;
                 }
                 
@@ -112,10 +112,10 @@
                 const b = Math.floor(p.cGift[2] + (p.cTree[2] - p.cGift[2]) * ease);
 
                 // --- 呼吸感优化：更深、更缓慢的波动 ---
-                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.4 + 0.6);
+                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.3 + 0.);
                 
                 // 空间感：远处的粒子稍微暗一点点
-                const depthFade = Math.max(0.3, s); 
+                const depthFade = Math.max(0.15, s); 
                 
                 ctx.fillStyle = `rgb(${r * shimmer * depthFade},${g * shimmer * depthFade},${b * shimmer * depthFade})`;
                 ctx.fillRect(rx*s + w/2, py*s + h/2, p.sz*s, p.sz*s);
