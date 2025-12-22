@@ -18,7 +18,7 @@
             <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700">Gift from Mengjie</h1>
             <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center">
                 <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
-                <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-500"></p>
+                <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-1000"></p>
                 <p class="fancy-font text-3xl text-yellow-600 mt-4">From Mengjie</p>
             </div>
             <p id="hint" class="text-white/20 tracking-[0.5em] text-xs">CLICK TO UNWRAP</p>
@@ -27,8 +27,16 @@
 
     <script>
         const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-        const msgs = ["Best wishes for a happy holiday season", "Success in 2026", "Thank you for your support!", "Wishing you peace, happiness, and all the best this holiday season"];
-        const DECO_COLORS = [[255, 50, 50], [50, 100, 255], [220, 220, 220], [180, 50, 255], [0, 128, 128], [255, 140, 0]];
+        const msgs = ["Best wishes for a happy holiday season", "Success in 2026", "Thank you for your support!", "Wishing you peace and happiness"];
+        
+        // 暖色系颜色库
+        const DECO_COLORS = [
+            [255, 69, 0],   // 橘红
+            [255, 140, 0],  // 橙色
+            [255, 215, 0],  // 金色
+            [255, 105, 180],// 暖粉
+            [255, 50, 50]    // 鲜红
+        ];
 
         let w, h, pts = [], snow = [], active = false, t = 0, rot = 0, mIdx = 0;
 
@@ -39,7 +47,8 @@
             const size = Math.min(w, h);
             const bS = size * 0.28, tH = h * 0.7, tB = size * 0.45;
 
-            for(let i=0; i<20000; i++) {
+            // 粒子数设为 12000，平衡性能与密度
+            for(let i=0; i<12000; i++) {
                 let bx, by, bz, s = Math.floor(Math.random()*6), u = Math.random()-0.5, v = Math.random()-0.5;
                 if(s==0){bx=0.5;by=u;bz=v} else if(s==1){bx=-0.5;by=u;bz=v} else if(s==2){bx=u;by=0.5;bz=v}
                 else if(s==3){bx=u;by=-0.5;bz=v} else if(s==4){bx=u;by=v;bz=0.5} else {bx=u;by=v;bz=-0.5}
@@ -52,40 +61,40 @@
                 let targetX, targetY, targetZ, targetColor, pSize;
                 const roll = Math.random();
 
-                if (i < 3000) { 
-                    // --- 螺旋优化：增加随机偏移（空间感）和粒子粗细 ---
+                if (i < 2500) { // 螺旋金光
                     const spiralAngle = (ty + 0.5) * Math.PI * 10; 
-                    const drift = (Math.random() - 0.5) * 0.2; // 增加螺旋散布感
+                    const drift = (Math.random() - 0.5) * 0.15; 
                     targetX = Math.cos(spiralAngle + drift) * (rBase + drift) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
-                    targetColor = [210, 165, 32]; // 柔和的金麒麟色，降低刺眼度
-                    pSize = Math.random() * 2.5 + 1; // 加粗螺旋粒子
-                } else if (roll < 0.15) { 
+                    targetColor = [255, 200, 50]; // 明亮的金黄色
+                    pSize = Math.random() * 2.5 + 1.2; 
+                } else if (roll < 0.2) { // 20% 暖色装饰
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
                     pSize = Math.random() * 2 + 1.5;
-                } else { 
+                } else { // 亮绿色
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = [50, 120 + Math.random()*70, 30];
+                    // 这里调高了绿色的亮度数值
+                    targetColor = [60, 180 + Math.random()*75, 50]; 
                     pSize = Math.random() * 1.5 + 0.8;
                 }
                 
                 pts.push({
                     bx: bx*bS, by: by*bS, bz: bz*bS,
                     tx: targetX, ty: targetY, tz: targetZ,
-                    cGift: isRibbon ? [218, 165, 32] : [180, 20, 20],
+                    cGift: isRibbon ? [255, 200, 50] : [200, 30, 30],
                     cTree: targetColor,
                     sz: pSize,
                     phase: Math.random() * Math.PI * 2,
-                    speed: 0.002 + Math.random() * 0.004 // 独立的呼吸速度
+                    speed: 0.002 + Math.random() * 0.004
                 });
             }
-            snow = Array.from({length:80}, () => ({x:Math.random()*w, y:Math.random()*h, v:Math.random()*1.2+0.5, s:Math.random()*2}));
+            snow = Array.from({length:60}, () => ({x:Math.random()*w, y:Math.random()*h, v:Math.random()*1.2+0.5, s:Math.random()*2}));
         }
 
         function draw() {
@@ -94,7 +103,7 @@
             ctx.fillRect(0, 0, w, h);
             ctx.globalCompositeOperation = 'lighter';
             
-            rot += 0.006; // 稍微减慢旋转，增加空间沉浸感
+            rot += 0.006; 
             if (active && t < 1) t += 0.012;
             const ease = t*t*(3-2*t), cos = Math.cos(rot), sin = Math.sin(rot);
 
@@ -102,7 +111,6 @@
                 const px = p.bx + (p.tx - p.bx) * ease;
                 const py = p.by + (p.ty - p.by) * ease;
                 const pz = p.bz + (p.tz - p.bz) * ease;
-
                 const rx = px * cos - pz * sin;
                 const rz = px * sin + pz * cos;
                 const s = 1000 / (1000 + rz);
@@ -111,11 +119,8 @@
                 const g = Math.floor(p.cGift[1] + (p.cTree[1] - p.cGift[1]) * ease);
                 const b = Math.floor(p.cGift[2] + (p.cTree[2] - p.cGift[2]) * ease);
 
-                // --- 呼吸感优化：更深、更缓慢的波动 ---
-                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.2 + 0.8);
-                
-                // 空间感：远处的粒子稍微暗一点点
-                const depthFade = Math.max(0.1, s); 
+                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.15 + 0.85);
+                const depthFade = Math.max(0.2, s); 
                 
                 ctx.fillStyle = `rgb(${r * shimmer * depthFade},${g * shimmer * depthFade},${b * shimmer * depthFade})`;
                 ctx.fillRect(rx*s + w/2, py*s + h/2, p.sz*s, p.sz*s);
@@ -125,9 +130,7 @@
                 ctx.fillStyle = "rgba(255,255,255,0.6)";
                 snow.forEach(s => {
                     s.y = (s.y + s.v) % h;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
                 });
             }
             requestAnimationFrame(draw);
@@ -154,7 +157,7 @@
                 el.innerText = msgs[mIdx];
                 el.style.opacity = 1;
                 mIdx = (mIdx + 1) % msgs.length;
-            }, 500);
+            }, 1000); // 增加切换时间让它更顺滑
             setTimeout(updateMsg, 5000);
         }
 
