@@ -65,15 +65,7 @@
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = const DECO_COLORS = [
-    [255, 69, 0],    // 橘红 (Red-Orange)
-    [255, 140, 0],   // 深橙 (Dark Orange)
-    [255, 215, 0],   // 金色 (Gold)
-    [255, 105, 180], // 热粉色 (Hot Pink) - 偏暖
-    [255, 255, 150], // 奶油黄 (Creamy Yellow)
-    [255, 165, 79],  // 琥珀色 (Amber)
-    [255, 50, 50]    // 亮红色 (Bright Red)
-];
+                    targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
                     pSize = Math.random() * 2 + 1.5;
                 } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
