@@ -28,15 +28,7 @@
     <script>
         const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
         const msgs = ["Wishing you peace & joy", "Success in 2025", "Merry Christmas!", "Stay healthy and happy"];
-        // 装饰球颜色库
-        const DECO_COLORS = [
-            [255, 50, 50],   // 红色
-            [50, 100, 255],  // 蓝色
-            [220, 220, 220], // 银色
-            [180, 50, 255],  // 紫色
-            [0, 128, 128],   // Teal色
-            [255, 140, 0]    // 橙色
-        ];
+        const DECO_COLORS = [[255, 50, 50], [50, 100, 255], [220, 220, 220], [180, 50, 255], [0, 128, 128], [255, 140, 0]];
 
         let w, h, pts = [], snow = [], active = false, t = 0, rot = 0, mIdx = 0;
 
@@ -57,34 +49,40 @@
                 const rBase = 0.5 * (ty + 0.5);
                 const a = Math.random() * Math.PI * 2;
                 
-                let targetX, targetY, targetZ, targetColor;
+                let targetX, targetY, targetZ, targetColor, pSize;
                 const roll = Math.random();
 
-                if (i < 2000) { // 螺旋灯带粒子 (保持金黄色)
-                    const spiralAngle = (ty + 0.5) * Math.PI * 12;
-                    targetX = Math.cos(spiralAngle) * rBase * tB;
+                if (i < 2000) { 
+                    // --- 螺旋优化：增加随机偏移（空间感）和粒子粗细 ---
+                    const spiralAngle = (ty + 0.5) * Math.PI * 10; 
+                    const drift = (Math.random() - 0.5) * 0.08; // 增加螺旋散布感
+                    targetX = Math.cos(spiralAngle + drift) * (rBase + drift) * tB;
                     targetY = ty * tH;
-                    targetZ = Math.sin(spiralAngle) * rBase * tB;
-                    targetColor = [255, 230, 100];
-                } else if (roll < 0.15) { // 15% 的粒子作为彩色装饰球
+                    targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
+                    targetColor = [218, 165, 32]; // 柔和的金麒麟色，降低刺眼度
+                    pSize = Math.random() * 3 + 1.5; // 加粗螺旋粒子
+                } else if (roll < 0.15) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                } else { // 剩余粒子作为绿色背景
+                    pSize = Math.random() * 2.5 + 1.2;
+                } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = [30, 100 + Math.random()*80, 40];
+                    targetColor = [20, 80 + Math.random()*60, 30];
+                    pSize = Math.random() * 1.5 + 0.5;
                 }
                 
                 pts.push({
                     bx: bx*bS, by: by*bS, bz: bz*bS,
                     tx: targetX, ty: targetY, tz: targetZ,
-                    cGift: isRibbon ? [255, 215, 0] : [200, 30, 30],
+                    cGift: isRibbon ? [218, 165, 32] : [180, 20, 20],
                     cTree: targetColor,
-                    sz: (i < 2000 || roll < 0.15) ? Math.random()*2.5 + 1.2 : Math.random()*1.5 + 0.5,
-                    phase: Math.random() * Math.PI * 2
+                    sz: pSize,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.002 + Math.random() * 0.004 // 独立的呼吸速度
                 });
             }
             snow = Array.from({length:80}, () => ({x:Math.random()*w, y:Math.random()*h, v:Math.random()*1.2+0.5, s:Math.random()*2}));
@@ -96,8 +94,8 @@
             ctx.fillRect(0, 0, w, h);
             ctx.globalCompositeOperation = 'lighter';
             
-            rot += 0.008;
-            if (active && t < 1) t += 0.012; // 稍微放慢一点点变换，增加优雅感
+            rot += 0.006; // 稍微减慢旋转，增加空间沉浸感
+            if (active && t < 1) t += 0.012;
             const ease = t*t*(3-2*t), cos = Math.cos(rot), sin = Math.sin(rot);
 
             pts.forEach(p => {
@@ -113,14 +111,18 @@
                 const g = Math.floor(p.cGift[1] + (p.cTree[1] - p.cGift[1]) * ease);
                 const b = Math.floor(p.cGift[2] + (p.cTree[2] - p.cGift[2]) * ease);
 
-                // 让装饰粒子和螺旋粒子的闪烁感更强
-                const shimmer = (Math.sin(Date.now()*0.005 + p.phase)*0.35 + 0.65);
-                ctx.fillStyle = `rgb(${r*shimmer},${g*shimmer},${b*shimmer})`;
+                // --- 呼吸感优化：更深、更缓慢的波动 ---
+                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.4 + 0.6);
+                
+                // 空间感：远处的粒子稍微暗一点点
+                const depthFade = Math.max(0.3, s); 
+                
+                ctx.fillStyle = `rgb(${r * shimmer * depthFade},${g * shimmer * depthFade},${b * shimmer * depthFade})`;
                 ctx.fillRect(rx*s + w/2, py*s + h/2, p.sz*s, p.sz*s);
             });
 
             if (active) {
-                ctx.fillStyle = "rgba(255,255,255,0.7)";
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
                 snow.forEach(s => {
                     s.y = (s.y + s.v) % h;
                     ctx.beginPath();
