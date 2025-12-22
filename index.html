@@ -15,7 +15,7 @@
     <div id="container" class="relative w-full h-screen cursor-pointer">
         <canvas id="c"></canvas>
         <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
-            <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700 animate-pulse">Gift from Mengjie</h1>
+            <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700">Gift from Mengjie</h1>
             <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center">
                 <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
                 <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-500"></p>
@@ -61,17 +61,25 @@
                     targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
                     targetColor = [210, 165, 32]; // 柔和的金麒麟色，降低刺眼度
                     pSize = Math.random() * 2.5 + 1; // 加粗螺旋粒子
-                } else if (roll < 0.10) { 
+                } else if (roll < 0.15) { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                    pSize = Math.random() * 2 + 1.0;
+                    targetColor = const DECO_COLORS = [
+    [255, 69, 0],    // 橘红 (Red-Orange)
+    [255, 140, 0],   // 深橙 (Dark Orange)
+    [255, 215, 0],   // 金色 (Gold)
+    [255, 105, 180], // 热粉色 (Hot Pink) - 偏暖
+    [255, 255, 150], // 奶油黄 (Creamy Yellow)
+    [255, 165, 79],  // 琥珀色 (Amber)
+    [255, 50, 50]    // 亮红色 (Bright Red)
+];
+                    pSize = Math.random() * 2 + 1.5;
                 } else { 
                     targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
                     targetY = ty * tH;
                     targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = [30, 100 + Math.random()*70, 50];
+                    targetColor = [50, 120 + Math.random()*70, 30];
                     pSize = Math.random() * 1.5 + 0.8;
                 }
                 
@@ -112,10 +120,10 @@
                 const b = Math.floor(p.cGift[2] + (p.cTree[2] - p.cGift[2]) * ease);
 
                 // --- 呼吸感优化：更深、更缓慢的波动 ---
-                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.3 + 0.7);
+                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.2 + 0.8);
                 
                 // 空间感：远处的粒子稍微暗一点点
-                const depthFade = Math.max(0.15, s); 
+                const depthFade = Math.max(0.1, s); 
                 
                 ctx.fillStyle = `rgb(${r * shimmer * depthFade},${g * shimmer * depthFade},${b * shimmer * depthFade})`;
                 ctx.fillRect(rx*s + w/2, py*s + h/2, p.sz*s, p.sz*s);
