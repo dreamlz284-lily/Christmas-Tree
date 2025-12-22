@@ -52,80 +52,97 @@
                 const rBase = 0.5 * (ty + 0.5);
                 const a = Math.random() * Math.PI * 2;
                 
-                let targetX, targetY, targetZ, targetColor, pSize;
+                let targetX, targetY, targetZ, targetColor, pSize, isSpiral = false, isStar = false;
                 const roll = Math.random();
 
-                if (i < 4000) { // 螺旋金光 (增加到4000个更壮观)
-                    const spiralAngle = (ty + 0.5) * Math.PI * 10; 
-                    const drift = (Math.random() - 0.5) * 0.18; 
-                    targetX = Math.cos(spiralAngle + drift) * (rBase + drift) * tB;
-                    targetY = ty * tH;
-                    targetZ = Math.sin(spiralAngle + drift) * (rBase + drift) * tB;
-                    targetColor = [255, 210, 50]; 
-                    pSize = Math.random() * 2.8 + 1.2; 
-                } else if (roll < 0.2) { 
-                    targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetY = ty * tH;
-                    targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetColor = DECO_COLORS[Math.floor(Math.random() * DECO_COLORS.length)];
-                    pSize = Math.random() * 2.5 + 1.5;
-                } else { 
-                    targetX = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    targetY = ty * tH;
-                    targetZ = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
-                    // 这里调亮了绿色：[R, G, B] -> G 通道基准提高
-                    targetColor = [50, 170 + Math.random()*85, 60]; 
-                    pSize = Math.random() * 1.8 + 0.8;
-                }
+                if (i < 500) { // 树顶星：保持跟树一样的慢速
+                    isStar = true;
+                    const sA = Math.random() * Math.PI * 2;
+                    const sD = Math.random() * 25; 
+                    tx = Math.cos(sA) * sD;
+                    typ = -tH/2 - 35; 
+                    tz = Math.sin(sA) * sD;
+                    col = [255, 255, 200]; sz = Math.random() * 3 + 1.5;
+            } else if (i < 5000) { // 金色螺旋：快速旋转
+                    isSpiral = true;
+                    const sAng = (ty + 0.5) * Math.PI * 10; 
+                    const dr = (Math.random() - 0.5) * 0.2; 
+                    tx = Math.cos(sAng + dr) * (rBase + dr) * tB;
+                    typ = ty * tH;
+                    tz = Math.sin(sAng + dr) * (rBase + dr) * tB;
+                    col = [255, 215, 30]; sz = Math.random() * 2.5 + 1.0;
+            } else { // 树体：慢速旋转
+                    tx = Math.cos(a) * rBase * Math.sqrt(Math.random()) * tB;
+                    typ = ty * tH;
+                    tz = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
+                    col = (Math.random() < 0.15) ? DECO_COLORS[i%5] : [60, 180 + Math.random()*75, 50];
+                    sz = Math.random() * 1.8 + 0.5;
+            }
                 
                 pts.push({
                     bx: bx*bS, by: by*bS, bz: bz*bS,
-                    tx: targetX, ty: targetY, tz: targetZ,
-                    cGift: isRibbon ? [255, 215, 0] : [180, 20, 20],
-                    cTree: targetColor,
-                    sz: pSize,
-                    phase: Math.random() * Math.PI * 2,
-                    speed: 0.002 + Math.random() * 0.004
+                    tx, ty: typ, tz,
+                    c1: isRibbon ? [255, 215, 0] : [200, 30, 30],
+                    c2: col, sz, isSpiral, isStar,
+                    ph: Math.random() * Math.PI * 2,
+                    sp: 0.002 + Math.random() * 0.004
                 });
             }
-            snow = Array.from({length:80}, () => ({x:Math.random()*w, y:Math.random()*h, v:Math.random()*1.2+0.5, s:Math.random()*2}));
+            snow = Array.from({length: 300}, () => ({
+                x: Math.random() * w, y: Math.random() * h, 
+                v: Math.random() * 1.5 + 0.5, s: Math.random() * 1.5 + 0.5,
+                w: (Math.random() - 0.5) * 0.5
+            }));
         }
 
         function draw() {
-            canvas.width = window.innerWidth; 
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, w, h);
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
             ctx.globalCompositeOperation = 'lighter';
             
-            rot += 0.006; 
-            if (active && t < 1) t += 0.012;
-            const ease = t*t*(3-2*t), cos = Math.cos(rot), sin = Math.sin(rot);
+            // --- 核心修改：定义两个速度 ---
+            rot += 0.004; // 树体旋转速度（慢）
+            let spiralRot = rot * 4; // 金色光芒旋转速度（快，4倍速）
 
-            pts.forEach(p => {
+            if (active && t < 1) t += 0.012;
+            const ease = t*t*(3-2*t);
+            
+            // 预计算两种角度
+            const cosT = Math.cos(rot), sinT = Math.sin(rot);
+            const cosS = Math.cos(spiralRot), sinS = Math.sin(spiralRot);
+
+            for (let i = 0; i < pts.length; i++) {
+                const p = pts[i];
                 const px = p.bx + (p.tx - p.bx) * ease;
                 const py = p.by + (p.ty - p.by) * ease;
                 const pz = p.bz + (p.tz - p.bz) * ease;
+                
+                // 根据类型选择旋转角度
+                const cos = p.isSpiral ? cosS : cosT;
+                const sin = p.isSpiral ? sinS : sinT;
+
                 const rx = px * cos - pz * sin;
                 const rz = px * sin + pz * cos;
                 const s = 1000 / (1000 + rz);
                 
-                const r = Math.floor(p.cGift[0] + (p.cTree[0] - p.cGift[0]) * ease);
-                const g = Math.floor(p.cGift[1] + (p.cTree[1] - p.cGift[1]) * ease);
-                const b = Math.floor(p.cGift[2] + (p.cTree[2] - p.cGift[2]) * ease);
+                const r = Math.floor(p.c1[0] + (p.c2[0] - p.c1[0]) * ease);
+                const g = Math.floor(p.c1[1] + (p.c2[1] - p.c1[1]) * ease);
+                const b = Math.floor(p.c1[2] + (p.c2[2] - p.c1[2]) * ease);
 
-                const shimmer = (Math.sin(Date.now() * p.speed + p.phase) * 0.2 + 0.8);
-                const depthFade = Math.max(0.15, s); 
-                
-                ctx.fillStyle = `rgb(${r * shimmer * depthFade},${g * shimmer * depthFade},${b * shimmer * depthFade})`;
+                let sh = (Math.sin(Date.now() * p.sp + p.ph) * 0.2 + 0.8);
+                if(p.isStar && active) sh += Math.random() * 0.4;
+
+                ctx.fillStyle = `rgb(${Math.floor(r * sh * s)},${Math.floor(g * sh * s)},${Math.floor(b * sh * s)})`;
                 ctx.fillRect(rx*s + w/2, py*s + h/2, p.sz*s, p.sz*s);
-            });
+            }
 
             if (active) {
-                ctx.fillStyle = "rgba(255,255,255,0.6)";
-                snow.forEach(s => {
-                    s.y = (s.y + s.v) % h;
-                    ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
-                });
+                ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+                for (let i = 0; i < snow.length; i++) {
+                    const sn = snow[i];
+                    sn.y = (sn.y + sn.v) % h; sn.x = (sn.x + sn.w + w) % w;
+                    ctx.beginPath(); ctx.arc(sn.x, sn.y, sn.s, 0, 7); ctx.fill();
+                }
             }
             requestAnimationFrame(draw);
         }
