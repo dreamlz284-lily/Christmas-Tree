@@ -13,7 +13,8 @@
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
             background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: none; /* This removes the edge line completely */
+            box-shadow: 0 0 40px 20px rgba(0, 0, 0, 0.2); /* Smooths the transition into the black background */
         }
     </style>
 </head>
@@ -22,7 +23,7 @@
         <canvas id="c"></canvas>
         <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
             <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700">Gift from Mengjie</h1>
-            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center">
+            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center pure-blur px-12 py-10 rounded-[60px]">
                 <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
                 <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-1000"></p>
                 <p class="fancy-font text-3xl text-yellow-600 mt-4">From Mengjie</p>
