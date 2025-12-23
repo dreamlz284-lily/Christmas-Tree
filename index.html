@@ -30,7 +30,7 @@
         const msgs = ["Best wishes for a happy holiday season", "Success in 2026", "Thank you for your support!", "Wishing you peace and happiness"];
         
         // 暖色系：金、橙、红、琥珀
-        const DECO_COLORS = [[255, 69, 0], [255, 165, 0], [255, 215, 0], [255, 105, 180], [255, 50, 50]];
+        const DECO_COLORS = [[255, 69, 5], [255, 165, 0], [255, 215, 0], [255, 105, 180], [255, 50, 50]];
 
         let w, h, pts = [], snow = [], active = false, t = 0, rot = 0, mIdx = 0;
 
@@ -60,8 +60,8 @@
                     isStar = true;
                     // 五角星的数学参数
                     const numPoints = 5;
-                    const innerRadius = 25;  // 内径
-                    const outerRadius = 550; // 外径
+                    const innerRadius = 35;  // 内径
+                    const outerRadius = 850; // 外径
                     
                     // 随机选择一个点在星形线上或内部
                     const angle = Math.random() * Math.PI * 2;
