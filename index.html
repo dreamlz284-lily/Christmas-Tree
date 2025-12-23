@@ -186,6 +186,11 @@
         document.getElementById('container').onclick = () => {
             if(!active) {
                 active = true;
+                // --- ADJUST VOLUME HERE ---
+                // 1.0 is max, 0.0 is silent. 0.3 is 30% volume.
+                audio.volume = 0.3; 
+                
+                audio.play().catch(e => console.log("Audio block:", e));
                 document.getElementById('h1').style.opacity = '0';
                 document.getElementById('hint').style.display = 'none';
                 setTimeout(() => {
