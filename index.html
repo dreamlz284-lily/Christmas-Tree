@@ -192,20 +192,31 @@
                     const t = document.getElementById('treeText');
                     t.classList.replace('opacity-0', 'opacity-100');
                     t.classList.replace('scale-95', 'scale-100');
-                    updateMsg();
+                    
+                    // FIX: Set the first message immediately
+                    const el = document.getElementById('msg');
+                    el.innerText = msgs[mIdx];
+                    el.style.opacity = 1;
+                    mIdx = (mIdx + 1) % msgs.length;
+                    
+                    // Start the rotation loop after 5 seconds
+                    setTimeout(updateMsg, 5000);
                 }, 800);
             }
         };
 
         function updateMsg() {
             const el = document.getElementById('msg');
-            el.style.opacity = 0;
+            el.style.opacity = 0; // Fade out current message
+            
             setTimeout(() => {
-                el.innerText = msgs[mIdx];
-                el.style.opacity = 1;
+                el.innerText = msgs[mIdx]; // Change text while invisible
+                el.style.opacity = 1;      // Fade in new message
                 mIdx = (mIdx + 1) % msgs.length;
-            }, 1000);
-            setTimeout(updateMsg, 5000);
+                
+                // Schedule the next change
+                setTimeout(updateMsg, 5000);
+            }, 1000); // Wait for fade out to finish
         }
 
         window.onresize = init;
