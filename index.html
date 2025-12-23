@@ -87,7 +87,7 @@
                 } else if (i < 5000) { // 金色螺旋：快速旋转
                     isSpiral = true;
                     const sAng = (ty + 0.5) * Math.PI * 10; 
-                    const dr = (Math.random() - 0.4) * 0.1; 
+                    const dr = (Math.random() - 0.5) * 0.1; 
                     tx = Math.cos(sAng + dr) * (rBase + dr) * tB;
                     typ = ty * tH;
                     tz = Math.sin(sAng + dr) * (rBase + dr) * tB;
@@ -97,7 +97,7 @@
                     typ = ty * tH;
                     tz = Math.sin(a) * rBase * Math.sqrt(Math.random()) * tB;
                     col = (Math.random() < 0.15) ? DECO_COLORS[i%5] : [60, 180 + Math.random()*75, 50];
-                    sz = Math.random() * 1.8 + 0.5;
+                    sz = Math.random() * 1.8 + 1.8;
             }
                 
                 pts.push({
