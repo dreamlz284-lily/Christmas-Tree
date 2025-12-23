@@ -61,7 +61,7 @@
                     // 五角星的数学参数
                     const numPoints = 5;
                     const innerRadius = 25;  // 内径
-                    const outerRadius = 250; // 外径
+                    const outerRadius = 50; // 外径
                     
                     // 随机选择一个点在星形线上或内部
                     const angle = Math.random() * Math.PI * 2;
@@ -87,7 +87,7 @@
                 } else if (i < 5000) { // 金色螺旋：快速旋转
                     isSpiral = true;
                     const sAng = (ty + 0.5) * Math.PI * 10; 
-                    const dr = (Math.random() - 0.5) * 0.01; 
+                    const dr = (Math.random() - 0.5) * 0.1; 
                     tx = Math.cos(sAng + dr) * (rBase + dr) * tB;
                     typ = ty * tH;
                     tz = Math.sin(sAng + dr) * (rBase + dr) * tB;
