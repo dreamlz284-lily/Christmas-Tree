@@ -29,9 +29,9 @@
 <body>
     <div id="container" class="relative w-full h-screen cursor-pointer">
         <canvas id="c"></canvas>
-        <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
+        <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-start py-16 pointer-events-none">
             <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700 transition-opacity duration-1000">Gift from Mengjie</h1>
-            <div id="treeText" class="opacity-100 scale-95 transition-all duration-1000 text-center pure-blur px-3 py-2 rounded-[20px]">
+            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center pure-blur px-3 py-2 rounded-[20px]">
                 <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
                 <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-1000"></p>
                 <p class="fancy-font text-3xl text-yellow-600 mt-4">From Mengjie</p>
@@ -186,16 +186,11 @@
         document.getElementById('container').onclick = () => {
             if(!active) {
                 active = true;
-                // --- ADJUST VOLUME HERE ---
-                // 1.0 is max, 0.0 is silent. 0.3 is 30% volume.
-                audio.volume = 0.8; 
-                
-                audio.play().catch(e => console.log("Audio block:", e));
                 document.getElementById('h1').style.opacity = '0';
                 document.getElementById('hint').style.display = 'none';
                 setTimeout(() => {
                     const t = document.getElementById('treeText');
-                    t.classList.replace('opacity-100', 'opacity-100');
+                    t.classList.replace('opacity-0', 'opacity-100');
                     t.classList.replace('scale-95', 'scale-100');
                     updateMsg();
                 }, 800);
