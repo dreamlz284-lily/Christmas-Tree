@@ -14,15 +14,15 @@
             z-index: 10; /* Ensures the box is on top of particles */
             
             /* High-strength blur */
-            backdrop-filter: blur(10px) saturate(120%);
-            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
             
             /* A slightly stronger semi-transparent black helps the blur show up */
-            background: rgba(0, 0, 0, 0.4); 
+            background: rgba(0, 0, 0, 0.2); 
             
             border: none;
             /* Shadow creates a soft 'glow' edge instead of a hard line */
-            box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.4); 
+            box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.2); 
         }
     </style>
 </head>
@@ -31,7 +31,7 @@
         <canvas id="c"></canvas>
         <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
             <h1 id="h1" class="fancy-font text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-700 transition-opacity duration-1000">Gift from Mengjie</h1>
-            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center pure-blur px-6 py-4 rounded-[30px]">
+            <div id="treeText" class="opacity-0 scale-95 transition-all duration-1000 text-center pure-blur px-3 py-2 rounded-[20px]">
                 <h2 class="fancy-font text-5xl md:text-6xl text-yellow-400 mb-2">Merry Christmas</h2>
                 <p id="msg" class="text-white/80 text-3xl italic h-16 transition-opacity duration-1000"></p>
                 <p class="fancy-font text-3xl text-yellow-600 mt-4">From Mengjie</p>
