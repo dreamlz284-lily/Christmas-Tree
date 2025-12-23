@@ -39,7 +39,7 @@
             h = canvas.height = window.innerHeight;
             pts = [];
             const size = Math.min(w, h);
-            const bS = size * 0.28, tH = h * 0.7, tB = size * 0.45;
+            const bS = size * 0.28, tH = h * 0.7, tB = size * 0.6;
 
             // 恢复 20,000 个粒子
             for(let i=0; i<20000; i++) {
@@ -60,7 +60,7 @@
                     isStar = true;
                     // 五角星的数学参数
                     const numPoints = 5;
-                    const innerRadius = 32;  // 内径
+                    const innerRadius = 25;  // 内径
                     const outerRadius = 80; // 外径
                     
                     // 随机选择一个点在星形线上或内部
@@ -83,7 +83,7 @@
                     tz = (Math.random() - 0.5) * 25; // 让星星有一点点厚度
                     
                     col = [250, 142, 10]; 
-                    sz = Math.random() * 0.8 + 1;
+                    sz = Math.random() * 1 + 1;
                 } else if (i < 5000) { // 金色螺旋：快速旋转
                     isSpiral = true;
                     const sAng = (ty + 0.5) * Math.PI * 10; 
@@ -109,7 +109,7 @@
                     sp: 0.002 + Math.random() * 0.004
                 });
             }
-            snow = Array.from({length: 300}, () => ({
+            snow = Array.from({length: 310}, () => ({
                 x: Math.random() * w, y: Math.random() * h, 
                 v: Math.random() * 1.5 + 0.5, s: Math.random() * 1.5 + 0.5,
                 w: (Math.random() - 0.5) * 0.5
@@ -123,7 +123,7 @@
             
             // --- 核心修改：定义两个速度 ---
             rot += 0.004; // 树体旋转速度（慢）
-            let spiralRot = rot * 4; // 金色光芒旋转速度（快，4倍速）
+            let spiralRot = rot * 2; // 金色光芒旋转速度（快，4倍速）
 
             if (active && t < 1) t += 0.012;
             const ease = t*t*(3-2*t);
