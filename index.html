@@ -27,6 +27,9 @@
     </style>
 </head>
 <body>
+    <audio id="bgMusic" loop>
+        <source src="https://www.chosic.com/wp-content/uploads/2021/11/We-Wish-You-A-Merry-Christmas.mp3" type="audio/mpeg">
+    </audio>
     <div id="container" class="relative w-full h-screen cursor-pointer">
         <canvas id="c"></canvas>
         <div id="overlay" class="absolute inset-0 flex flex-col items-center justify-between py-16 pointer-events-none">
@@ -188,7 +191,7 @@
                 active = true;
                 // --- ADJUST VOLUME HERE ---
                 // 1.0 is max, 0.0 is silent. 0.3 is 30% volume.
-                audio.volume = 0.3; 
+                audio.volume = 0.8; 
                 
                 audio.play().catch(e => console.log("Audio block:", e));
                 document.getElementById('h1').style.opacity = '0';
